@@ -171,6 +171,7 @@ client.once('ready', () => {
 });
 
 console.log('1 - antes do login');
+console.log('TOKEN:', process.env.TOKEN ? 'EXISTE' : 'NÃO EXISTE');
 
 client.login(process.env.TOKEN)
   .then(() => console.log('2 - login aceito'))
