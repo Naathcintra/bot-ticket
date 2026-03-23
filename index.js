@@ -24,8 +24,8 @@ const CANAL_LOGS = 'COLOQUE_O_ID_DO_CANAL_LOGS'; // pode deixar '' se não quise
 const PREFIXO = '!';
 // ==================
 
-client.once('clientReady', () => {
-  console.log(`Logado como ${client.user.tag}`);
+client.once('ready', () => {
+  console.log('BOT CONECTADO DE VERDADE');
 });
 
 client.on('messageCreate', async (message) => {
@@ -171,9 +171,10 @@ client.once('ready', () => {
 console.log('1 - antes do login');
 console.log('TOKEN:', process.env.TOKEN ? 'EXISTE' : 'NÃO EXISTE');
 
-client.login(process.env.TOKEN)
-  .then(() => console.log('2 - login aceito'))
-  .catch(err => console.error('3 - erro no login:', err));
+client.login(process.env.TOKEN);
+
+client.on('error', console.error);
+client.on('warn', console.warn);
 
 const express = require('express');
 const app = express();
