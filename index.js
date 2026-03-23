@@ -15,19 +15,25 @@ const {
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.MessageContent
   ]
 });
 
 // ===== CONFIG =====
 const CATEGORIA_TICKETS = '1485637897049866320';
-const CANAL_LOGS = 'COLOQUE_O_ID_DO_CANAL_LOGS'; // pode deixar '' se não quiser
+const CANAL_LOGS = ''; 
 const PREFIXO = '!';
 // ==================
 
 client.once('ready', () => {
-  console.log('BOT CONECTADO DE VERDADE');
+  console.log(`Logado como ${client.user.tag}`);
 });
 
+client.on('error', console.error);
+client.on('warn', console.warn);
+
+// ===== COMANDO =====
 client.on('messageCreate', async (message) => {
   if (message.author.bot) return;
   if (!message.guild) return;
@@ -38,10 +44,7 @@ client.on('messageCreate', async (message) => {
       .setTitle('🎀 Central de Tickets')
       .setDescription(
         'Escolha uma opção abaixo para abrir seu atendimento:\n\n' +
-        '🛒 Compras\n' +
-        '💳 Pagamento\n' +
-        '🆘 Suporte\n' +
-        '🤝 Parceria'
+        '🛒 Compras\n💳 Pagamento\n🆘 Suporte\n🤝 Parceria'
       );
 
     const menu = new StringSelectMenuBuilder()
@@ -63,8 +66,9 @@ client.on('messageCreate', async (message) => {
   }
 });
 
+// ===== INTERAÇÕES =====
 client.on('interactionCreate', async (interaction) => {
-  // ===== MENU =====
+
   if (interaction.isStringSelectMenu() && interaction.customId === 'ticket_menu') {
     const tipo = interaction.values[0];
 
@@ -75,13 +79,6 @@ client.on('interactionCreate', async (interaction) => {
       parceria: '🤝 Parceria'
     };
 
-    const descricoes = {
-      compras: 'Explique aqui o que deseja comprar.',
-      pagamento: 'Explique aqui seu problema com pagamento.',
-      suporte: 'Explique aqui seu problema.',
-      parceria: 'Explique sua proposta de parceria.'
-    };
-
     const nomeCanal = `${tipo}-${interaction.user.username}`
       .toLowerCase()
       .replace(/[^a-z0-9\-]/g, '');
@@ -89,7 +86,7 @@ client.on('interactionCreate', async (interaction) => {
     const canal = await interaction.guild.channels.create({
       name: nomeCanal,
       type: ChannelType.GuildText,
-      parent: CATEGORIA_TICKETS || null,
+      parent: CATEGORIA_TICKETS,
       permissionOverwrites: [
         {
           id: interaction.guild.id,
@@ -109,14 +106,13 @@ client.on('interactionCreate', async (interaction) => {
     const embed = new EmbedBuilder()
       .setColor('#ff69b4')
       .setTitle(nomes[tipo])
-      .setDescription(`${interaction.user}, ${descricoes[tipo]}`);
+      .setDescription(`${interaction.user}, explique seu problema.`);
 
     const row = new ActionRowBuilder().addComponents(
       new ButtonBuilder()
         .setCustomId('fechar')
         .setLabel('Fechar Ticket')
         .setStyle(ButtonStyle.Danger)
-        .setEmoji('🔒')
     );
 
     await canal.send({
@@ -131,7 +127,6 @@ client.on('interactionCreate', async (interaction) => {
     });
   }
 
-  // ===== FECHAR =====
   if (interaction.isButton() && interaction.customId === 'fechar') {
     const row = new ActionRowBuilder().addComponents(
       new ButtonBuilder()
@@ -140,23 +135,14 @@ client.on('interactionCreate', async (interaction) => {
         .setStyle(ButtonStyle.Danger)
     );
 
-    const embed = new EmbedBuilder()
-      .setColor('#ff69b4')
-      .setTitle('Ticket fechado')
-      .setDescription('clique abaixo para deletar');
-
     await interaction.update({
-      embeds: [embed],
+      content: 'ticket fechado',
       components: [row]
     });
   }
 
-  // ===== DELETAR =====
   if (interaction.isButton() && interaction.customId === 'deletar') {
-    await interaction.reply({
-      content: 'apagando...',
-      ephemeral: true
-    });
+    await interaction.reply({ content: 'apagando...', ephemeral: true });
 
     setTimeout(() => {
       interaction.channel.delete().catch(console.error);
@@ -164,18 +150,18 @@ client.on('interactionCreate', async (interaction) => {
   }
 });
 
-client.once('ready', () => {
-  console.log(`Logado como ${client.user.tag}`);
-});
+// ===== LOGIN =====
+(async () => {
+  try {
+    console.log('tentando login...');
+    await client.login(process.env.TOKEN);
+    console.log('LOGIN OK');
+  } catch (err) {
+    console.error('ERRO NO LOGIN:', err);
+  }
+})();
 
-console.log('1 - antes do login');
-console.log('TOKEN:', process.env.TOKEN ? 'EXISTE' : 'NÃO EXISTE');
-
-client.login(process.env.TOKEN);
-
-client.on('error', console.error);
-client.on('warn', console.warn);
-
+// ===== EXPRESS (pra render não desligar) =====
 const express = require('express');
 const app = express();
 
@@ -187,4 +173,5 @@ app.listen(process.env.PORT || 3000, '0.0.0.0', () => {
   console.log('Porta aberta');
 });
 
+// manter vivo
 setInterval(() => {}, 1000);
