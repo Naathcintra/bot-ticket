@@ -1,6 +1,6 @@
 console.log('INICIOU O BOT');
 
-\const {
+const {
   Client,
   GatewayIntentBits,
   PermissionsBitField,
