@@ -1,4 +1,6 @@
-const {
+console.log('INICIOU O BOT');
+
+\const {
   Client,
   GatewayIntentBits,
   PermissionsBitField,
@@ -19,7 +21,6 @@ const client = new Client({
 });
 
 // ===== CONFIG =====
-const TOKEN = process.env.TOKEN;
 const CATEGORIA_TICKETS = '1485637897049866320';
 const CANAL_LOGS = 'COLOQUE_O_ID_DO_CANAL_LOGS'; // pode deixar '' se não quiser
 const PREFIXO = '!';
@@ -165,7 +166,15 @@ client.on('interactionCreate', async (interaction) => {
   }
 });
 
-client.login(TOKEN);
+client.once('ready', () => {
+  console.log(`Logado como ${client.user.tag}`);
+});
+
+console.log('1 - antes do login');
+
+client.login(process.env.TOKEN)
+  .then(() => console.log('2 - login aceito'))
+  .catch(err => console.error('3 - erro no login:', err));
 
 const express = require('express');
 const app = express();
