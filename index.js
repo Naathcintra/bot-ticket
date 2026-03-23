@@ -185,3 +185,5 @@ app.get('/', (req, res) => {
 app.listen(process.env.PORT || 3000, '0.0.0.0', () => {
   console.log('Porta aberta');
 });
+
+setInterval(() => {}, 1000);
